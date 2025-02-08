@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import warnings
 
@@ -12,13 +13,13 @@ from superteam_ai.document_processor.loader import DocumentLoader
 warnings.filterwarnings("ignore")
 
 
-
 class LocalLLM:
     def __init__(self, config):
         self.config = config
         self.llm = Ollama(model=config['model_name'])
         # Use a specific embedding model (e.g., nomic-embed-text) for consistent dimensions
-        self.embeddings = OllamaEmbeddings(model=config.get('embedding_model_name', 'nomic-embed-text'), )
+        self.embeddings = OllamaEmbeddings(model=config.get('embedding_model_name', 'nomic-embed-text'))
+        # self.embeddings = OllamaEmbeddings(model=config['model_name'])
         self.document_loader = DocumentLoader()
         self.vector_store = None
         self.qa_chain = None
@@ -29,6 +30,19 @@ class LocalLLM:
             is_persistent=True
         )
         self.conversation_history = []  # new attribute to keep conversation context
+        # Define the system prompt for ensuring accurate and non-hallucinating responses
+        self.system_prompt = """
+You are a secure, AI-powered Telegram bot and the official knowledge base for Superteam Vietnam. You must provide fact-based, accurate, and short and  concise responses strictly based on verified documents and trusted data sources. Under no circumstances should you speculate, infer, or fabricate any information.
+
+Rules:
+
+If you are not 100% certain of the answer based on verified sources, respond only with 'NO.' Do not attempt to guess or provide unverified information.
+Never generate details beyond what is explicitly stated in the provided data. If a question requires context you do not have, say NO.
+Retrieval-Augmented Generation (RAG) context should only be used when absolutely necessary. Do not include it unless essential for accuracy.
+Maintain strict data privacy. Never disclose sensitive, speculative, or unverified details.
+All responses must be brief, factual, and strictly aligned with the verified data provided.
+Your primary function is accuracy, not engagement. If a query falls outside your confirmed knowledge, respond with NO."
+        """
 
     def _clear_vector_store(self):
         if os.path.exists(self.vector_store_path):
@@ -60,23 +74,26 @@ class LocalLLM:
         if not self.qa_chain:
             raise ValueError("Documents must be loaded first using load_documents()")
         
-        response = self.qa_chain.invoke(prompt)
-        return response
+        response = self.qa_chain.invoke(prompt)['result']
+        
+        cleaned_response = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
+        return cleaned_response.strip()
 
     def conversation_turn(self, user_input):
-        # Append user input to conversation history
+        # Build prompt using system prompt and conversation history
+        conversation_context = self.system_prompt + "\n\n"
+        if self.conversation_history:
+            conversation_context += "\n".join(self.conversation_history) + "\n"
+        conversation_context += f"User: {user_input}\nBot:"
+        response = self.generate_response(conversation_context)
         self.conversation_history.append(f"User: {user_input}")
-        # Build conversation prompt with existing context, keeping only the last N turns if desired
-        # For simplicity, we're using full context
-        conversation_prompt = "\n".join(self.conversation_history) + "\nBot:"
-        response = self.generate_response(conversation_prompt)
         self.conversation_history.append(f"Bot: {response}")
         return response
 
 
 if __name__ == "__main__":
     config = {
-        'model_name': 'llama3.1',
+        'model_name': 'deepseek-r1:1.5b',
         'embedding_model_name': 'nomic-embed-text',
         'vector_store_path': './vector_store'
     }
@@ -84,4 +101,7 @@ if __name__ == "__main__":
     llm.load_documents(["./data/sample.pdf"])
     response = llm.generate_response("What is the purpose of this document?")
     print(response)
-
+    
+    
+    
+    

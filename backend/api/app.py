@@ -19,7 +19,7 @@ from superteam_ai.llm.local_llm import LocalLLM
 
 # Initialize LocalLLM
 config = {
-    'model_name': 'llama3.1',
+    'model_name': 'deepseek-r1:1.5b',
     'embedding_model_name': 'nomic-embed-text',
     'vector_store_path': './vector_store'
 }

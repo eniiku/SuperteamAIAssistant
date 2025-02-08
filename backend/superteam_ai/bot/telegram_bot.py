@@ -33,7 +33,7 @@ class TelegramBot:
 if __name__ == "__main__":
     config = Config()
     llm_config = {
-        'model_name': 'llama3.1',
+        'model_name': 'deepseek-r1:1.5b',
         'embedding_model_name': 'nomic-embed-text',
         'vector_store_path': './vector_store'
     }
