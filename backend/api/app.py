@@ -1,10 +1,10 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
 import os
 import shutil
 from typing import List
-from loguru import logger
 
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.responses import JSONResponse
+from loguru import logger
 
 app = FastAPI()
 
@@ -19,7 +19,7 @@ from superteam_ai.llm.local_llm import LocalLLM
 
 # Initialize LocalLLM
 config = {
-    'model_name': 'deepseek-r1:1.5b',
+    'model_name': 'llama3.1',
     'embedding_model_name': 'nomic-embed-text',
     'vector_store_path': './vector_store'
 }

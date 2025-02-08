@@ -1,12 +1,9 @@
-from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    filters,
-)
-from superteam_ai.llm.local_llm import LocalLLM
+import asyncio  # new import
+
 from superteam_ai.config import Config
+from superteam_ai.llm.local_llm import LocalLLM
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 
 class TelegramBot:
@@ -25,7 +22,8 @@ class TelegramBot:
 
     async def handle_message(self, update: Update, context):
         user_message = update.message.text
-        response = self.llm.generate_response(user_message)
+        # Run conversation_turn in a thread to avoid blocking the event loop
+        response = await asyncio.to_thread(self.llm.conversation_turn, user_message)
         await update.message.reply_text(response)
 
     def run(self):
@@ -35,7 +33,7 @@ class TelegramBot:
 if __name__ == "__main__":
     config = Config()
     llm_config = {
-        'model_name': 'deepseek-r1:1.5b',
+        'model_name': 'llama3.1',
         'embedding_model_name': 'nomic-embed-text',
         'vector_store_path': './vector_store'
     }

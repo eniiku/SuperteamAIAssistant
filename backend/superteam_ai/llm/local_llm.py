@@ -1,14 +1,14 @@
+import os
+import shutil
+import warnings
+
+from chromadb.config import Settings
 from langchain.chains import RetrievalQA
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
-import shutil
-import os
-from chromadb.config import Settings
-
 from superteam_ai.document_processor.loader import DocumentLoader
 
-import warnings
 warnings.filterwarnings("ignore")
 
 
@@ -28,6 +28,7 @@ class LocalLLM:
             allow_reset=True,
             is_persistent=True
         )
+        self.conversation_history = []  # new attribute to keep conversation context
 
     def _clear_vector_store(self):
         if os.path.exists(self.vector_store_path):
@@ -62,10 +63,20 @@ class LocalLLM:
         response = self.qa_chain.invoke(prompt)
         return response
 
+    def conversation_turn(self, user_input):
+        # Append user input to conversation history
+        self.conversation_history.append(f"User: {user_input}")
+        # Build conversation prompt with existing context, keeping only the last N turns if desired
+        # For simplicity, we're using full context
+        conversation_prompt = "\n".join(self.conversation_history) + "\nBot:"
+        response = self.generate_response(conversation_prompt)
+        self.conversation_history.append(f"Bot: {response}")
+        return response
+
 
 if __name__ == "__main__":
     config = {
-        'model_name': 'deepseek-r1:1.5b',
+        'model_name': 'llama3.1',
         'embedding_model_name': 'nomic-embed-text',
         'vector_store_path': './vector_store'
     }
@@ -73,4 +84,4 @@ if __name__ == "__main__":
     llm.load_documents(["./data/sample.pdf"])
     response = llm.generate_response("What is the purpose of this document?")
     print(response)
-    
+
