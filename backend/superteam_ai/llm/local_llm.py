@@ -18,7 +18,7 @@ class LocalLLM:
         self.config = config
         self.llm = Ollama(model=config['model_name'])
         # Use a specific embedding model (e.g., nomic-embed-text) for consistent dimensions
-        self.embeddings = OllamaEmbeddings(model=config.get('embedding_model_name', 'nomic-embed-text'))
+        self.embeddings = OllamaEmbeddings(model=config.get('embedding_model_name', 'nomic-embed-text'), )
         self.document_loader = DocumentLoader()
         self.vector_store = None
         self.qa_chain = None
@@ -73,5 +73,4 @@ if __name__ == "__main__":
     llm.load_documents(["./data/sample.pdf"])
     response = llm.generate_response("What is the purpose of this document?")
     print(response)
-    
     
