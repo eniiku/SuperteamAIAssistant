@@ -9,5 +9,6 @@ def main():
     bot = TelegramBot(config, llm)
     bot.run()
 
+
 if __name__ == "__main__":
     main()
