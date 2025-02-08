@@ -6,6 +6,7 @@ from telegram.ext import (
     MessageHandler,
     Updater,
 )
+from llm import LocalLLM
 
 
 class TelegramBot:
@@ -31,3 +32,6 @@ class TelegramBot:
     def run(self):
         self.updater.start_polling()
         self.updater.idle()
+        
+    def llm_response(self):
+        
