@@ -4,9 +4,13 @@ from typing import List
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
+from fastapi.templating import Jinja2Templates
 from loguru import logger
 
 app = FastAPI()
+
+# Mount templates directory
+templates = Jinja2Templates(directory="templates")
 
 # Configure upload settings
 UPLOAD_DIR = "uploads"
@@ -24,6 +28,13 @@ config = {
     "vector_store_path": "./vector_store",
 }
 llm_instance = LocalLLM(config)
+
+# Endpoints
+
+
+@app.get("/")
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.post("/upload/")
