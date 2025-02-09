@@ -25,8 +25,24 @@ class LocalLLM:
         self.qa_chain = None
         self.vector_store_path = config.get("vector_store_path", "./vector_store")
         self.chroma_settings = Settings(
-            anonymized_telemetry=False, allow_reset=True, is_persistent=True
+            anonymized_telemetry=False,
+            allow_reset=True,
+            is_persistent=True
         )
+        self.conversation_history = []  # new attribute to keep conversation context
+        # Define the system prompt for ensuring accurate and non-hallucinating responses
+        self.system_prompt = """
+You are a secure, AI-powered Telegram bot and the official knowledge base for Superteam Vietnam. You must provide fact-based, accurate, and short and  concise responses strictly based on verified documents and trusted data sources. Under no circumstances should you speculate, infer, or fabricate any information.
+
+Rules:
+
+If you are not 100% certain of the answer based on verified sources, respond only with 'NO.' Do not attempt to guess or provide unverified information.
+Never generate details beyond what is explicitly stated in the provided data. If a question requires context you do not have, say NO.
+Retrieval-Augmented Generation (RAG) context should only be used when absolutely necessary. Do not include it unless essential for accuracy.
+Maintain strict data privacy. Never disclose sensitive, speculative, or unverified details.
+All responses must be brief, factual, and strictly aligned with the verified data provided.
+Your primary function is accuracy, not engagement. If a query falls outside your confirmed knowledge, respond with NO."
+        """
 
     def _clear_vector_store(self):
         if os.path.exists(self.vector_store_path):
@@ -55,8 +71,21 @@ class LocalLLM:
     def generate_response(self, prompt):
         if not self.qa_chain:
             raise ValueError("Documents must be loaded first using load_documents()")
+        
+        response = self.qa_chain.invoke(prompt)['result']
+        
+        cleaned_response = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
+        return cleaned_response.strip()
 
-        response = self.qa_chain.invoke(prompt)
+    def conversation_turn(self, user_input):
+        # Build prompt using system prompt and conversation history
+        conversation_context = self.system_prompt + "\n\n"
+        if self.conversation_history:
+            conversation_context += "\n".join(self.conversation_history) + "\n"
+        conversation_context += f"User: {user_input}\nBot:"
+        response = self.generate_response(conversation_context)
+        self.conversation_history.append(f"User: {user_input}")
+        self.conversation_history.append(f"Bot: {response}")
         return response
 
 
