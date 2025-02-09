@@ -1,69 +1,84 @@
-# SuperTeam AI Assistant Backend
+# SuperTeam AI Assistant
 
-A powerful AI assistant backend system built with FastAPI and LangChain, featuring local LLM integration through Ollama and a Telegram bot interface.
+A FastAPI and LangChain-based AI assistant with local LLM integration through Ollama, featuring a Telegram bot interface and document processing capabilities. Created by [@eniiku]("https://github.com/eniiku"), and [@eskayML]("https://github.com/eskayML")
 
-## 🌟 Features
+## Architecture
 
-- **Local LLM Integration**: Uses Ollama for running local language models
-- **Vector Store**: ChromaDB-based document storage and retrieval
-- **Multiple Document Support**: Handles PDF, DOCX, and JSON files
-- **API Interface**: FastAPI-based REST API
-- **Telegram Bot**: Built-in Telegram bot integration
-- **Document Processing**: Intelligent document chunking and embedding
-- **Configurable**: Environment-based configuration system
+```
+├── api/
+│   ├── app.py              # FastAPI application
+│   └── templates/          # HTML templates
+├── superteam_ai/
+│   ├── bot/               # Telegram bot implementation
+│   │   ├── __init__.py
+│   │   └── telegram_bot.py
+│   ├── config/           # Configuration management
+│   ├── document_processor/ # Document processing utilities
+│   ├── llm/              # Local LLM integration
+│   │   ├── __init__.py
+│   │   └── local-llm.py
+│   └── utils/            # Utility functions
+├── tests/                # Test suite
+└── requirements.txt      # Project dependencies
+```
 
-## 🛠️ Technology Stack
+## Core Components
 
-- **Framework**: FastAPI
-- **LLM Integration**: Ollama, LangChain
-- **Vector Store**: ChromaDB
-- **Document Processing**: LangChain Document Loaders
-- **Bot Framework**: python-telegram-bot
-- **Embeddings**: Ollama Embeddings
+### Local LLM Integration
 
-## 🚀 Getting Started
+- Uses Ollama for local model inference
+- Implements RAG (Retrieval Augmented Generation)
+- ChromaDB for vector storage
+- Document processing with LangChain
 
-### Prerequisites
+### FastAPI Backend
+
+- File upload endpoints
+- Document processing
+- HTML interface
+
+### Telegram Bot
+
+- Interactive chat interface
+- RAG-based responses
+- Conversation history tracking
+
+## Prerequisites
 
 - Python 3.8+
-- Ollama installed on your system
-- Telegram Bot Token (for bot functionality)
+- Ollama installed locally with required models:
+  - deepseek-r1:1.5b
+  - nomic-embed-text
 
-### Installation
+## Setup
 
 1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/eniiku/SuperteamAIAssistant.git
-   cd SuperteamAIAssistant/
-   ```
+```bash
+git clone https://github.com/eniiku/SuperteamAIAssistant.git
+cd SuperteamAIAssistant
+```
 
-2. Create a virtual environment and activate it:
+2. Create and activate virtual environment:
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use: .\\venv\\Scripts\\activate
-   ```
+```bash
+python -m venv venv
+source venv/bin/activate  # Windows: .\venv\Scripts\activate
+```
 
 3. Install dependencies:
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-4. Set up the required LLM models with Ollama:
+4. Set up environment variables:
 
-   ```bash
-   ollama pull nomic-embed-text
-   ollama pull deepseek-r1:1.5b
-   ```
+```env
+TELEGRAM_TOKEN=your_telegram_bot_token
+```
 
-5. Create a .env file with your configuration:
-   ```env
-   TELEGRAM_TOKEN=your_telegram_bot_token
-   ```
-
-## 🏃‍♂️ Running the Application
+## Usage
 
 ### Starting the API Server
 
@@ -71,45 +86,24 @@ A powerful AI assistant backend system built with FastAPI and LangChain, featuri
 uvicorn api.app:app --reload
 ```
 
-The API will be available at `http://localhost:8000`
+Access the web interface at `http://localhost:8000`
 
 ### Running the Telegram Bot
 
 ```bash
-python -m superteam_ai.main
+python -m superteam_ai.bot.telegram_bot
 ```
 
-## 📁 Project Structure
+## API Endpoints
 
-```
-backend/
-├── api/
-│   ├── app.py              # FastAPI application
-│   └── templates/          # HTML templates
-├── superteam_ai/
-│   ├── bot/               # Telegram bot implementation
-│   ├── config/           # Configuration management
-│   ├── document_processor/ # Document processing utilities
-│   ├── llm/              # Local LLM integration
-│   └── utils/            # Utility functions
-├── tests/                # Test suite
-└── requirements.txt      # Project dependencies
-```
+### File Upload
 
-## 🔧 Configuration
-
-The system can be configured through environment variables:
-
-- `TELEGRAM_TOKEN`: Your Telegram bot token
-- Additional configuration can be added in `superteam_ai/config/config.py`
-
-## 🚀 API Endpoints
-
-- `GET /`: Web interface
 - `POST /upload/`: Upload single document
 - `POST /upload-multiple/`: Upload multiple documents
 
-## 💡 Features in Detail
+Supported file extensions: `.txt`, `.pdf`, `.doc`, `.docx`
+
+## Core Features
 
 ### Document Processing
 
@@ -129,18 +123,10 @@ The system can be configured through environment variables:
 - Document processing capabilities
 - Configurable response generation
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 👥 Authors
+## Authors
 
 - Initial work - [eniiku & eskayML]
 
----
+## License
 
-For more information or support, please open an issue in the repository.
+MIT
