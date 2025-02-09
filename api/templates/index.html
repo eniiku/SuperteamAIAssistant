@@ -3,168 +3,314 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document Upload</title>
+    <title>Document Upload - SuperteamAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #f5f5f5;
+        font-family: "Inter", sans-serif;
       }
-      .upload-container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
+      .upload-drop-zone {
+        border: 2px dashed #e2e8f0;
+        transition: all 0.3s ease;
       }
-      h1,
-      h2 {
-        color: #333;
+      .upload-drop-zone:hover {
+        border-color: #6366f1;
       }
-      .upload-form {
-        margin-bottom: 20px;
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
       }
-      .file-input {
-        margin: 10px 0;
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
       }
-      .submit-btn {
-        background-color: #4caf50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
+      .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
-      .submit-btn:hover {
-        background-color: #45a049;
-      }
-      .status {
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 4px;
-      }
-      .success {
-        background-color: #dff0d8;
-        color: #3c763d;
-      }
-      .error {
-        background-color: #f2dede;
-        color: #a94442;
-      }
-      .allowed-types {
-        font-size: 14px;
-        color: #666;
-        margin-top: 5px;
+      .loading-overlay {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
       }
     </style>
   </head>
-  <body>
-    <h1>Document Upload</h1>
-    <div class="upload-container">
-      <h2>Single File Upload</h2>
-      <form id="singleUploadForm" class="upload-form">
-        <div class="file-input">
-          <input
-            type="file"
-            id="singleFile"
-            accept=".txt,.pdf,.doc,.docx"
-            required
-          />
+  <body
+    class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50"
+  >
+    <!-- Header -->
+    <header
+      class="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-gray-200"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+          <div class="flex items-center space-x-3">
+            <i class="ph ph-brain text-indigo-600 text-3xl"></i>
+            <span class="text-xl font-semibold text-gray-800">SuperteamAI</span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-sm text-gray-600">Document Processing</span>
+            <div class="h-6 w-px bg-gray-200"></div>
+            <div class="flex items-center space-x-1">
+              <div class="w-2 h-2 rounded-full bg-green-500"></div>
+              <span class="text-sm text-gray-600">System Online</span>
+            </div>
+          </div>
         </div>
-        <div class="allowed-types">
-          Allowed file types: .txt, .pdf, .doc, .docx
-        </div>
-        <button type="submit" class="submit-btn">Upload File</button>
-      </form>
-      <div id="singleUploadStatus" class="status"></div>
-    </div>
+      </div>
+    </header>
 
-    <div class="upload-container">
-      <h2>Multiple Files Upload</h2>
-      <form id="multipleUploadForm" class="upload-form">
-        <div class="file-input">
-          <input
-            type="file"
-            id="multipleFiles"
-            accept=".txt,.pdf,.doc,.docx"
-            multiple
-            required
-          />
+    <!-- Main Content -->
+    <main class="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Title Section -->
+        <div class="text-center mb-12">
+          <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl mb-4">
+            Document Upload
+          </h1>
+          <p class="text-lg text-gray-600">
+            Upload your documents for AI-powered processing
+          </p>
         </div>
-        <div class="allowed-types">
-          Allowed file types: .txt, .pdf, .doc, .docx
+
+        <!-- Upload Container -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+          <div class="flex items-center mb-6">
+            <i class="ph ph-files text-2xl text-indigo-600 mr-3"></i>
+            <h2 class="text-xl font-semibold text-gray-800">Document Upload</h2>
+          </div>
+
+          <form id="uploadForm" class="space-y-6">
+            <div class="upload-drop-zone rounded-xl p-8 text-center relative">
+              <input
+                type="file"
+                id="fileInput"
+                accept=".txt,.pdf,.doc,.docx"
+                class="hidden"
+                multiple
+              />
+              <label for="fileInput" class="cursor-pointer">
+                <i
+                  class="ph ph-upload-simple text-4xl text-indigo-600 mb-4"
+                ></i>
+                <div class="text-sm text-gray-600">
+                  <span class="font-semibold text-indigo-600"
+                    >Click to upload</span
+                  >
+                  or drag and drop
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                  Supported formats: TXT, PDF, DOC, DOCX
+                </p>
+              </label>
+
+              <!-- Loading Overlay -->
+              <div
+                id="loadingOverlay"
+                class="hidden absolute inset-0 loading-overlay rounded-xl flex items-center justify-center"
+              >
+                <div class="text-center">
+                  <div
+                    class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"
+                  ></div>
+                  <p class="text-sm text-gray-600" id="uploadProgress">
+                    Uploading files...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- File Preview Container -->
+            <div id="filePreview" class="hidden space-y-2"></div>
+
+            <div>
+              <button
+                type="submit"
+                id="uploadButton"
+                class="w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <i class="ph ph-upload-simple mr-2"></i>
+                <span>Upload Files</span>
+              </button>
+            </div>
+          </form>
         </div>
-        <button type="submit" class="submit-btn">Upload Files</button>
-      </form>
-      <div id="multipleUploadStatus" class="status"></div>
-    </div>
+      </div>
+    </main>
 
     <script>
-      // Single file upload
-      document
-        .getElementById("singleUploadForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const statusDiv = document.getElementById("singleUploadStatus");
-          const fileInput = document.getElementById("singleFile");
-          const file = fileInput.files[0];
+      // Upload Manager Class
+      class UploadManager {
+        constructor() {
+          this.fileInput = document.getElementById("fileInput");
+          this.filePreview = document.getElementById("filePreview");
+          this.uploadForm = document.getElementById("uploadForm");
+          this.uploadButton = document.getElementById("uploadButton");
+          this.loadingOverlay = document.getElementById("loadingOverlay");
+          this.uploadProgress = document.getElementById("uploadProgress");
+          this.setupEventListeners();
+        }
 
-          if (!file) {
-            statusDiv.className = "status error";
-            statusDiv.textContent = "Please select a file";
-            return;
-          }
+        setupEventListeners() {
+          this.fileInput.addEventListener("change", () =>
+            this.handleFileSelection(),
+          );
+          this.uploadForm.addEventListener("submit", (e) =>
+            this.handleUpload(e),
+          );
+          this.setupDragAndDrop();
+        }
 
-          const formData = new FormData();
-          formData.append("file", file);
+        setupDragAndDrop() {
+          const dropZone = document.querySelector(".upload-drop-zone");
 
-          try {
-            const response = await fetch("/upload/", {
-              method: "POST",
-              body: formData,
+          ["dragenter", "dragover", "dragleave", "drop"].forEach(
+            (eventName) => {
+              dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              });
+            },
+          );
+
+          ["dragenter", "dragover"].forEach((eventName) => {
+            dropZone.addEventListener(eventName, () => {
+              dropZone.classList.add("border-indigo-600");
             });
+          });
 
-            const result = await response.json();
+          ["dragleave", "drop"].forEach((eventName) => {
+            dropZone.addEventListener(eventName, () => {
+              dropZone.classList.remove("border-indigo-600");
+            });
+          });
 
-            if (response.ok) {
-              statusDiv.className = "status success";
-              statusDiv.textContent = `Success: ${result.status}`;
-              fileInput.value = "";
-            } else {
-              statusDiv.className = "status error";
-              statusDiv.textContent = `Error: ${result.detail}`;
-            }
-          } catch (error) {
-            statusDiv.className = "status error";
-            statusDiv.textContent = `Error: ${error.message}`;
+          dropZone.addEventListener("drop", (e) => {
+            this.fileInput.files = e.dataTransfer.files;
+            this.handleFileSelection();
+          });
+        }
+
+        handleFileSelection() {
+          const files = Array.from(this.fileInput.files);
+          this.filePreview.innerHTML = "";
+
+          if (files.length > 0) {
+            this.filePreview.classList.remove("hidden");
+            files.forEach((file, index) => {
+              const filePreview = this.createFilePreviewElement(file, index);
+              this.filePreview.appendChild(filePreview);
+            });
+            this.uploadButton.disabled = false;
+          } else {
+            this.filePreview.classList.add("hidden");
+            this.uploadButton.disabled = true;
           }
-        });
+        }
 
-      // Multiple files upload
-      document
-        .getElementById("multipleUploadForm")
-        .addEventListener("submit", async (e) => {
+        createFilePreviewElement(file, index) {
+          const div = document.createElement("div");
+          div.className =
+            "flex items-center justify-between p-3 bg-indigo-50 rounded-lg";
+          div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <i class="ph ph-file-text text-indigo-600"></i>
+                        <span class="text-sm font-medium text-gray-700">${file.name}</span>
+                    </div>
+                    <button type="button" data-index="${index}"
+                            class="text-gray-500 hover:text-gray-700">
+                        <i class="ph ph-x"></i>
+                    </button>
+                `;
+
+          div
+            .querySelector("button")
+            .addEventListener("click", () => this.removeFile(index));
+          return div;
+        }
+
+        removeFile(index) {
+          const dt = new DataTransfer();
+          const files = Array.from(this.fileInput.files);
+          files.splice(index, 1);
+          files.forEach((file) => dt.items.add(file));
+          this.fileInput.files = dt.files;
+          this.handleFileSelection();
+        }
+
+        showLoading(message) {
+          this.loadingOverlay.classList.remove("hidden");
+          this.uploadProgress.textContent = message;
+          this.uploadButton.disabled = true;
+        }
+
+        hideLoading() {
+          this.loadingOverlay.classList.add("hidden");
+          this.uploadButton.disabled = false;
+        }
+
+        showToast(message, type = "success") {
+          const colors = {
+            success: "linear-gradient(to right, #10B981, #059669)",
+            error: "linear-gradient(to right, #EF4444, #DC2626)",
+            info: "linear-gradient(to right, #6366F1, #4F46E5)",
+          };
+
+          Toastify({
+            text: message,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+            style: {
+              background: colors[type],
+              borderRadius: "8px",
+              padding: "12px 24px",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+            },
+          }).showToast();
+        }
+
+        async handleUpload(e) {
           e.preventDefault();
-          const statusDiv = document.getElementById("multipleUploadStatus");
-          const fileInput = document.getElementById("multipleFiles");
-          const files = fileInput.files;
+          const files = this.fileInput.files;
 
           if (files.length === 0) {
-            statusDiv.className = "status error";
-            statusDiv.textContent = "Please select at least one file";
+            this.showToast("Please select at least one file", "error");
             return;
           }
 
           const formData = new FormData();
-          for (let i = 0; i < files.length; i++) {
-            formData.append("files", files[i]);
+          const endpoint =
+            files.length === 1 ? "/upload/" : "/upload-multiple/";
+
+          if (files.length === 1) {
+            formData.append("file", files[0]);
+          } else {
+            Array.from(files).forEach((file) => {
+              formData.append("files", file);
+            });
           }
 
           try {
-            const response = await fetch("/upload-multiple/", {
+            this.showLoading(
+              `Uploading ${files.length} file${files.length === 1 ? "" : "s"}...`,
+            );
+
+            const response = await fetch(endpoint, {
               method: "POST",
               body: formData,
             });
@@ -172,18 +318,25 @@
             const result = await response.json();
 
             if (response.ok) {
-              statusDiv.className = "status success";
-              statusDiv.textContent = `Success: ${result.message}. Uploaded ${result.uploaded_files.length} files.`;
-              fileInput.value = "";
+              this.showToast(
+                files.length === 1 ? result.status : result.message,
+              );
+              this.fileInput.value = "";
+              this.filePreview.innerHTML = "";
+              this.filePreview.classList.add("hidden");
             } else {
-              statusDiv.className = "status error";
-              statusDiv.textContent = `Error: ${result.detail}`;
+              throw new Error(result.detail || "Upload failed");
             }
           } catch (error) {
-            statusDiv.className = "status error";
-            statusDiv.textContent = `Error: ${error.message}`;
+            this.showToast(error.message, "error");
+          } finally {
+            this.hideLoading();
           }
-        });
+        }
+      }
+
+      // Initialize Upload Manager
+      const uploadManager = new UploadManager();
     </script>
   </body>
 </html>
