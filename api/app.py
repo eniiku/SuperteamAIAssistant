@@ -2,15 +2,17 @@ import os
 import shutil
 from typing import List
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from loguru import logger
 
+from superteam_ai.llm.local_llm import LocalLLM
+
 app = FastAPI()
 
 # Mount templates directory
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="api/templates")
 
 # Configure upload settings
 UPLOAD_DIR = "uploads"
@@ -19,7 +21,6 @@ ALLOWED_EXTENSIONS = {".txt", ".pdf", ".doc", ".docx"}
 # Create uploads directory if it doesn't exist
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-from superteam_ai.llm.local_llm import LocalLLM
 
 # Initialize LocalLLM
 config = {
